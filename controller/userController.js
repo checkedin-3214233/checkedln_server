@@ -15,12 +15,12 @@ export const checkUser = async (req, res, next) => {
 }
 
 export const signup = async (req, res, next) => {
-    const { name, email, phone, profileImageUrl, notificationToken, dateOfBirth, gender, userImages } = req.body;
+    const { name, userName, phone, profileImageUrl, notificationToken, dateOfBirth, gender, userImages, bio } = req.body;
     if (!name) {
         return res.status(400).send({ "message": "Name is Required", "isSuccesfull": false });
     }
-    if (!email) {
-        return res.status(400).send({ "message": "Email is Required", "isSuccesfull": false });
+    if (!userName) {
+        return res.status(400).send({ "message": "UserName is Required", "isSuccesfull": false });
 
     }
     if (!phone) {
@@ -37,11 +37,11 @@ export const signup = async (req, res, next) => {
     if (!gender) {
         return res.status(400).send({ "message": "Gender is Required", "isSuccesfull": false });
     }
-    const emailUser = await User.findOne({ email: email });
+    const emailUser = await User.findOne({ userName: userName });
     const phoneUser = await User.findOne({ phone: phone });
-    if (emailUser || phoneUser) return res.status(400).send({ "message": "Email or Phone Number  Already Exit", "isSuccesfull": false });
+    if (emailUser || phoneUser) return res.status(400).send({ "message": "UserName or Phone Number  Already Exit", "isSuccesfull": false });
     try {
-        const newUser = await User.create({ name, email, phone, profileImageUrl, notificationToken, dateOfBirth, gender, userImages })
+        const newUser = await User.create({ name, userName, phone, profileImageUrl, notificationToken, dateOfBirth, gender, userImages, bio })
 
         const accessToken = await signAccessToken(newUser.id);
         const refreshToken = await signRefreshToken(newUser.id);
@@ -51,13 +51,14 @@ export const signup = async (req, res, next) => {
             message: "User Created Successfully",
             user: {
                 name: newUser.name,
-                email: newUser.email,
+                userName: newUser.userName,
                 phone: newUser.phone,
                 profileImageUrl: newUser.profileImageUrl,
                 dateOfBirth: newUser.dateOfBirth,
                 gender: newUser.gender,
                 userImages: newUser.userImages,
                 userId: newUser._id,
+                bio: newUser.bio,
                 accessToken: accessToken,
                 refreshToken: refreshToken
             },
@@ -105,6 +106,7 @@ export const login = async (req, res, next) => {
                 gender: newUser.gender,
                 userImages: newUser.userImages,
                 userId: newUser._id,
+                bio: newUser.bio,
                 accessToken: accessToken,
                 refreshToken: refreshToken
             },

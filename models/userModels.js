@@ -7,11 +7,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Name is Required']
     },
-    email: {
+    userName: {
         type: String,
-        required: [true, "Email is required"],
+        required: [true, "UserName is required"],
         unique: true,
-        validate: validator.isEmail
+        index: true,
+        sparse: true
     },
     phone: {
         type: String,
@@ -42,6 +43,10 @@ const userSchema = new mongoose.Schema({
             required: [true, "User Image is required"]
         }
     ],
+    bio: {
+        type: String,
+        required: [false]
+    }
 
 
 }, {
