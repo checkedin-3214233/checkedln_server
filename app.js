@@ -5,7 +5,7 @@ import colors from 'colors'
 import cors from "cors";
 import { app, server } from "./socket/socket.js";
 import authRoute from './route/authRoute.js'
-
+import uploadRoute from './route/uploadRoute.js'
 dotenv.config();
 connectDB();
 connectFirebase();
@@ -17,6 +17,7 @@ app.get("/", async (req, res, next) => {
     res.send("Hello from Checkedln");
 });
 app.use("/api/v1/auth", authRoute);
+app.use('/upload', uploadRoute);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
