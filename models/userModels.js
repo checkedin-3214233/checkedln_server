@@ -46,7 +46,14 @@ const userSchema = new mongoose.Schema({
     bio: {
         type: String,
         required: [false]
-    }
+    },
+    buddies: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
+
 
 
 }, {

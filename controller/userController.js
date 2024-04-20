@@ -113,7 +113,7 @@ export const login = async (req, res, next) => {
 
         })
     } catch (error) {
-        res.status(500).send({
+        return res.status(500).send({
             success: false,
             message: "Unable to login ",
             error: error
@@ -122,5 +122,63 @@ export const login = async (req, res, next) => {
     }
 
 
+
+}
+
+export const getUser = async (req, res, next) => {
+    const userId = req.payload.userId;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).send({ "message": "User Not Found", success: false, });
+        return res.status(200).send({
+            success: true,
+            message: "User Found",
+            user: user,
+
+
+        });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get user",
+            error: error
+
+        })
+    }
+}
+
+
+export const updateUser = async (req, res, next) => {
+    const userId = req.payload.userId;
+    const { name, userName, profileImageUrl, dateOfBirth, gender, bio } = req.body;
+    try {
+        const username = await User.findOne({ _id: { $ne: userId }, userName: userName });
+        if (username) return res.status(400).send({ "message": "UserName Already Exit", success: false, });
+
+        const newUser = await User.findOneAndUpdate({
+            _id: userId
+        }, {
+            name: name,
+            userName: userName,
+            profileImageUrl: profileImageUrl,
+            dateOfBirth: dateOfBirth,
+            gender: gender,
+            bio: bio
+        }, {
+            returnOriginal: false
+        });
+        return res.status(200).send({
+            success: true,
+            message: "User Updated Successfully", user: newUser
+        })
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to update user",
+            error: error
+
+        })
+    }
 
 }
