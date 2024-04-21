@@ -76,6 +76,21 @@ export const signup = async (req, res, next) => {
 
 }
 
+
+export const refreshToken = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) throw createError.BadRequest();
+        const userId = await verifyRefreshToken(refreshToken);
+        const accessToken = await signAccessToken(userId);
+        const refreshToken1 = await signRefreshToken(userId);
+        res.send({ accessToken, refreshToken: refreshToken1 });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 export const login = async (req, res, next) => {
     const { phone, notificationToken } = req.body;
     if (!phone) {
