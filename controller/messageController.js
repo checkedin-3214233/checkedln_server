@@ -144,6 +144,16 @@ export const getMessages = async (req, res) => {
             participants: { $all: [senderId, userToChatId] },
         }).populate("messages");
         if (!conversation) return res.status(200).json([]);
+        const reciverUserChat = await UsersChat.findOneAndUpdate({
+            senderId: senderId,
+            allUsers: { $elemMatch: { users: userToChatId } }
+        }, {
+
+            'allUsers.$.totalUnreadMessage': 0,
+
+        }, {
+            returnOriginal: false
+        });
         return res.status(200).json(conversation.messages);
 
 
