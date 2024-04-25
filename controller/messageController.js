@@ -7,8 +7,9 @@ export const sendMessages = async (req, res) => {
     console.log("Message Sent");
     try {
         const { message, type } = req.body;
-        const { receiverId } = req.params.userId;;
-        if (!receiverId && receiverId !== '') return res.status(400).json({ error: "Receiver Id is Required" });
+        const { userId: receiverId } = req.params;
+        console.log(receiverId);
+        if (receiverId === ":userId") return res.status(400).json({ error: "Receiver Id is Required" });
         const senderId = req.user._id;
         let conversation = await Conversation.findOne({
             participants: { $all: [senderId, receiverId] }
@@ -45,6 +46,16 @@ export const sendMessages = async (req, res) => {
             allUsers: { $elemMatch: { users: receiverId } }
         }, {
             'allUsers.$.lastMessage': newMessage,
+            'allUsers.$.totalUnreadMessage': 0,
+            'allUsers.$.lastSeen': new Date()
+        }, {
+            returnOriginal: false
+        });
+        const reciverUserChat = await UsersChat.findOneAndUpdate({
+            senderId: receiverId,
+            allUsers: { $elemMatch: { users: senderId } }
+        }, {
+            'allUsers.$.lastMessage': newMessage,
             $inc: { 'allUsers.$.totalUnreadMessage': 1 },
             'allUsers.$.lastSeen': new Date()
         }, {
@@ -59,7 +70,7 @@ export const sendMessages = async (req, res) => {
                         allUsers: {
                             users: receiverId,
                             lastMessage: newMessage,
-                            totalUnreadMessage: 1,
+                            totalUnreadMessage: 0,
                             lastSeen: new Date()
                         }
                     }
@@ -72,6 +83,35 @@ export const sendMessages = async (req, res) => {
                     allUsers: [{
                         users: receiverId,
                         lastMessage: newMessage,
+                        totalUnreadMessage: 0,
+                        lastSeen: new Date()
+                    }]
+                })
+                await newUserChat.save();
+            }
+
+        }
+        if (!reciverUserChat) {
+            const userChatWithReciverId = await UsersChat.findOneAndUpdate(
+                { senderId: receiverId, },
+                {
+                    $push: {
+                        allUsers: {
+                            users: senderId,
+                            lastMessage: newMessage,
+                            totalUnreadMessage: 1,
+                            lastSeen: new Date()
+                        }
+                    }
+                },
+                { new: true } // Return the updated document
+            );
+            if (!userChatWithReciverId) {
+                const newUserChat = UsersChat({
+                    senderId: receiverId,
+                    allUsers: [{
+                        users: senderId,
+                        lastMessage: newMessage,
                         totalUnreadMessage: 1,
                         lastSeen: new Date()
                     }]
@@ -80,6 +120,7 @@ export const sendMessages = async (req, res) => {
             }
 
         }
+
 
 
         return res.status(201).send({
