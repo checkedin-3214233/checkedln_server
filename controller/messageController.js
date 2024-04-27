@@ -144,6 +144,7 @@ export const getMessages = async (req, res) => {
             participants: { $all: [senderId, userToChatId] },
         }).populate("messages");
         if (!conversation) return res.status(200).json([]);
+        console.log(conversation.messages.reverse());
         const reciverUserChat = await UsersChat.findOneAndUpdate({
             senderId: senderId,
             allUsers: { $elemMatch: { users: userToChatId } }
@@ -154,7 +155,8 @@ export const getMessages = async (req, res) => {
         }, {
             returnOriginal: false
         });
-        return res.status(200).json(conversation.messages);
+        const conversationReverse = conversation.messages.reverse();
+        return res.status(200).json(conversationReverse);
 
 
     } catch (error) {
