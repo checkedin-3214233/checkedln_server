@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     profileImageUrl: {
         type: String,
-        required: [true, "Profile Image is required"],
+        required: [false],
     },
     notificationToken: {
         type: String,

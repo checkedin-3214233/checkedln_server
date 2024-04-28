@@ -27,9 +27,7 @@ export const signup = async (req, res, next) => {
         return res.status(400).send({ "message": "Phone is Required", "isSuccesfull": false });
 
     }
-    if (!profileImageUrl) {
-        return res.status(400).send({ "message": "Profile Image is Required", "isSuccesfull": false });
-    }
+
     if (!dateOfBirth) {
         return res.status(400).send({ "message": "Date of Birth is Required", "isSuccesfull": false });
     }
