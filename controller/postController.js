@@ -18,7 +18,14 @@ export const createPost = async (req, res) => {
                 ]
             });
             await post.save();
-            return res.status(200).json({ "message": "Post Created Successfully", post: post.posts[0] });
+            return res.status(200).json({
+                "message": "Post Created Successfully", post: {
+                    images,
+                    friends,
+                    location,
+                    description
+                }
+            });
         }
         const newpost = userPost.posts.push({
             images,
@@ -28,7 +35,14 @@ export const createPost = async (req, res) => {
         });
         await userPost.save();
 
-        return res.status(200).json({ "message": "Post Created Successfully", post: newpost });
+        return res.status(200).json({
+            "message": "Post Created Successfully", post: {
+                images,
+                friends,
+                location,
+                description,
+            }
+        });
     } catch (error) {
         return res.status(200).json({ "message": "Unable to Creat Post ", error: error.message });
 
