@@ -195,3 +195,22 @@ export const updateUser = async (req, res, next) => {
     }
 
 }
+
+export const getSearchedUser = async (req, res, next) => {
+    const { userName } = req.body;
+    try {
+        const users = await User.find({ userName: { $regex: userName, $options: 'i' } });
+        return res.status(200).send({
+            success: true,
+            message: "Users Found",
+            users: users
+        })
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get users",
+            error: error
+
+        })
+    }
+}
