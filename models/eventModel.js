@@ -29,10 +29,7 @@ const eventSchema = new mongoose.Schema({
             message: "End Date Time must be later than Start Date Time"
         }
     },
-    location: {
-        type: String,
-        required: [true, "Event Venue is required"]
-    },
+
     description: {
         type: String,
         required: [true, "Description is required"]
@@ -53,7 +50,17 @@ const eventSchema = new mongoose.Schema({
             type: String,
             default: []
         }
-    ]
+    ],
+    location: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Location",
+        required: [true, "Location is required"]
+    },
+    price: {
+        type: Number,
+        required: [false]
+    },
+
 }, { timestamps: true })
 const Event = mongoose.model("Events", eventSchema);
 export default Event;
