@@ -96,3 +96,15 @@ export const getUpcomingEvents = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const getEventById = async (req, res) => {
+    const { eventId } = req.params;
+    try {
+        const event = await Event.findById(eventId).populate("attendies location");
+        return res.status(200).json({ event: event });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ error: error.message });
+    }
+
+}
