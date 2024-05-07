@@ -109,9 +109,9 @@ export const getEventById = async (req, res) => {
             const events = eventStatus.events.find(eventItem => eventItem.event.equals(eventId));
 
 
-            return res.status(200).json({ event: { event, status: events.status } });
+            return res.status(200).json({ event, status: events.status });
         }
-        return res.status(200).json({ event: { event, status: "not going" } });
+        return res.status(200).json({ event, status: "not going" });
 
     } catch (error) {
         console.log(error.message);
