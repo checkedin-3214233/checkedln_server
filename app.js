@@ -10,6 +10,7 @@ import userRoute from './route/userRoute.js'
 import postRoute from './route/postRoute.js'
 import messageRoute from './route/messageRoute.js'
 import eventRoute from './route/eventRoute.js';
+import notificationRoute from './route/notificationRoute.js';
 import { verifyAccessToken } from "./services/jwt_helper.js";
 dotenv.config();
 connectDB();
@@ -23,6 +24,7 @@ app.get("/", async (req, res, next) => {
 });
 app.use("/api/v1/auth", authRoute);
 app.use('/upload', uploadRoute);
+app.use("/api/v1/notification", verifyAccessToken, notificationRoute)
 app.use("/api/v1/user", verifyAccessToken, userRoute)
 app.use("/api/v1/messages", verifyAccessToken, messageRoute);
 app.use("/api/v1/event", verifyAccessToken, eventRoute);

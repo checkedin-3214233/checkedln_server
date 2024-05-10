@@ -1,4 +1,5 @@
 import Event from '../models/eventModel.js';
+import { SendNotification, pushNotification } from '../services/pushNotificationServices.js';
 import Location from '../models/locationModel.js';
 import EventStatus from '../models/eventStatusModel.js';
 export const createEvent = async (req, res) => {
@@ -65,7 +66,7 @@ export const getNearByEvents = async (req, res) => {
 
         // Extract location IDs from nearby locations
         const locationIds = nearbyLocations.map(location => location._id);
-
+        console.log(locationIds);
         // Find events that have a location within the specified IDs
         const nearbyEvents = await Event.find({
             location: { $in: locationIds }, type: "public", startDateTime: {
@@ -136,6 +137,42 @@ export const requestEvent = async (req, res) => {
                 ]
             });
             await newEventStatus.save();
+            const event = await Event.findById(eventId);
+            const createdUser = event.createdBy;
+            console.log(createdUser.notificationToken);
+            if (createdUser.notificationToken) {
+                var notificationMessage = {
+                    app_id: process.env.NOTIFICATION_APP_ID,
+                    contents: {
+                        "en": `Event Request`
+                    },
+                    headings: {
+                        "en": `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+                    },
+
+                    buttons: [{ "action": "accept", "id": "id1", "text": "Accept", "icon": "https://cdn-icons-png.flaticon.com/512/2550/2550322.png" }, { "id": "id2", "text": "Reject", "icon": "https://cdn.vectorstock.com/i/1000v/10/97/reject-icon-vector-10851097.jpg", "action": "reject" }],
+                    included_segments: ["include_subscription_ids"],
+                    include_subscription_ids: [`${createdUser.notificationToken}`],
+                    content_available: true,
+                    large_icon: req.user.profileImageUrl,
+                    big_picture: event.bannerImages,
+                    small_icon: "ic_notification_icon",
+                    data: {
+                        event: event,
+
+                        PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+                    }
+                };
+                SendNotification(notificationMessage, async (error, results) => {
+
+                })
+
+            }
+            pushNotification(createdUser._id, "eventStatus", {
+                event: event,
+
+                PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+            }, req.user,)
             return res.status(200).json({ message: "Event Requested Successfully You Will be notified once Admin Accept it." });
         }
         const findEventStatusById = await EventStatus.findOne({
@@ -151,6 +188,42 @@ export const requestEvent = async (req, res) => {
             }
             findEventStatusById.events[eventIndex].status = status;
             await findEventStatusById.save();
+            const event = await Event.findById(eventId).populate("createdBy");
+            const createdUser = event.createdBy;
+            console.log(createdUser);
+            console.log(createdUser.notificationToken);
+            if (createdUser.notificationToken) {
+                var notificationMessage = {
+                    app_id: process.env.NOTIFICATION_APP_ID,
+                    contents: {
+                        "en": `Event Request.`
+                    },
+                    headings: {
+                        "en": `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+                    },
+
+                    large_icon: req.user.profileImageUrl,
+                    big_picture: event.bannerImages,
+                    included_segments: ["include_subscription_ids"],
+                    buttons: [{ "action": "accept", "id": "id1", "text": "Accept", "icon": "https://cdn-icons-png.flaticon.com/512/2550/2550322.png" }, { "id": "id2", "text": "Reject", "icon": "https://cdn.vectorstock.com/i/1000v/10/97/reject-icon-vector-10851097.jpg", "action": "reject" }],
+
+                    include_subscription_ids: [`${createdUser.notificationToken}`],
+                    content_available: true,
+                    small_icon: "ic_notification_icon",
+                    data: {
+                        event: event,
+                        PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+                    }
+                };
+                SendNotification(notificationMessage, async (error, results) => {
+
+                })
+            }
+            pushNotification(createdUser._id, "eventStatus", {
+                event: event,
+
+                PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+            }, req.user,)
             return res.status(200).json({ message: `Event ${status} Successfully You Will be notified about the event in future.` });
 
         }
@@ -161,7 +234,40 @@ export const requestEvent = async (req, res) => {
             status: status
         });
         await eventStatus.save();
+        const event = await Event.findById(eventId);
+        const createdUser = event.createdBy;
+        if (createdUser.notificationToken) {
+            var notificationMessage = {
+                app_id: process.env.NOTIFICATION_APP_ID,
+                contents: {
+                    "en": `Event Request`
+                },
+                headings: {
+                    "en": `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+                },
 
+                included_segments: ["include_subscription_ids"],
+                include_subscription_ids: [`${createdUser.notificationToken}`],
+                content_available: true,
+                small_icon: "ic_notification_icon",
+                large_icon: req.user.profileImageUrl,
+                big_picture: event.bannerImages,
+                buttons: [{ "action": "accept", "id": "id1", "text": "Accept", "icon": "https://cdn-icons-png.flaticon.com/512/2550/2550322.png" }, { "id": "id2", "text": "Reject", "icon": "https://cdn.vectorstock.com/i/1000v/10/97/reject-icon-vector-10851097.jpg", "action": "reject" }],
+
+                data: {
+                    event: event,
+                    PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+                }
+            };
+            SendNotification(notificationMessage, async (error, results) => {
+
+            })
+        }
+        pushNotification(createdUser._id, "eventStatus", {
+            event: event,
+
+            PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
+        }, req.user,)
         return res.status(200).json({
             message: "Event Requested Successfully You Will be notified once Admin Accept it."
         });
@@ -170,3 +276,4 @@ export const requestEvent = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 }
+
