@@ -12,7 +12,9 @@ import messageRoute from './route/messageRoute.js'
 import eventRoute from './route/eventRoute.js';
 import notificationRoute from './route/notificationRoute.js';
 import { verifyAccessToken } from "./services/jwt_helper.js";
-dotenv.config();
+// Make sure to import the 'path' module
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path'; dotenv.config();
 connectDB();
 connectFirebase();
 app.use(cors())
@@ -21,6 +23,17 @@ app.use(express.json());
 
 app.get("/", async (req, res, next) => {
     res.send("Hello from Checkedln");
+});
+
+// Optional: a route to serve the JSON file directly if you prefer
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Serve static files from the services directory
+app.use('/.well-known', express.static(join(__dirname, 'services')));
+
+app.get('/.well-known/assetlinks.json', (req, res) => {
+    res.sendFile(path.join(__dirname, 'services', 'assetlinks.json'));
 });
 app.use("/api/v1/auth", authRoute);
 app.use('/upload', uploadRoute);
