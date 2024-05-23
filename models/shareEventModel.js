@@ -10,6 +10,12 @@ const shareEventSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Events",
     },
+    status: {
+        type: String,
+        required: [false,],
+        enum: ["live", "expired"],
+        default: "live"
+    },
 
 }, { timestamps: true })
 const ShareEvent = mongoose.model("ShareEvents", shareEventSchema);
