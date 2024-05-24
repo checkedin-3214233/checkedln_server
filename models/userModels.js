@@ -50,7 +50,8 @@ const userSchema = new mongoose.Schema({
     buddies: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            default: []
         }
     ],
 

@@ -215,3 +215,41 @@ export const getSearchedUser = async (req, res, next) => {
         })
     }
 }
+
+export const getUserById = async (req, res, next) => {
+    const { otherUserId } = req.params;
+    const userId = req.user.id
+    try {
+        const user = await User.findById(otherUserId);
+        if (!user) return res.status(404).send({ "message": "User Not Found", success: false, });
+        const present = user.buddies.includes(userId);
+        if (present) {
+            return res.status(200).send({
+                success: true,
+                message: "User Found",
+                user: user,
+                isRequested: false
+            });
+        }
+        // Find the requestedUser document by userId
+        const requestedUser = await RequestedUser.findOne({ userId: userId });
+        console.log(requestedUser);
+
+        // Check if otherUserId is in the requestedUser array
+        const isRequested = requestedUser && requestedUser.requestedUser.includes(otherUserId);
+
+        return res.status(200).send({
+            success: true,
+            message: "User Found",
+            user: user,
+            isRequested: !!isRequested // Ensuring boolean value
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get user",
+            error: error
+        });
+    }
+}
