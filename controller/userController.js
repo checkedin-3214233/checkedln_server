@@ -1,6 +1,6 @@
 import e from "express";
 import User from "../models/userModels.js";
-
+import RequestedUser from "../models/userRequestModel.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwt_helper.js"
 
 export const checkUser = async (req, res, next) => {
@@ -43,6 +43,7 @@ export const signup = async (req, res, next) => {
 
         const accessToken = await signAccessToken(newUser.id);
         const refreshToken = await signRefreshToken(newUser.id);
+        const requestedUser = await RequestedUser.create({ userId: newUser.id, requestedUser: [] });
 
         return res.status(201).send({
             success: true,
