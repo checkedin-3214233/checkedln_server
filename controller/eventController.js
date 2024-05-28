@@ -1,5 +1,6 @@
 import Event from '../models/eventModel.js';
 import { SendNotification, pushNotification } from '../services/pushNotificationServices.js';
+import User from "../models/userModels.js";
 import Location from '../models/locationModel.js';
 import EventStatus from '../models/eventStatusModel.js';
 export const createEvent = async (req, res) => {
@@ -280,3 +281,74 @@ export const requestEvent = async (req, res) => {
     }
 }
 
+export const acceptRequest = async (req, res) => {
+    const { eventId, otherUserId } = req.params;
+    const userId = req.user._id;
+    console.log('userId:', otherUserId);
+    console.log('eventId:', eventId);
+
+    try {
+        const eventStatus = await EventStatus.findOne({ userId: otherUserId });
+        if (!eventStatus) {
+            console.log("eventStatus0", eventStatus);
+            return res.status(404).json({ message: "Event not found" });
+        }
+        const userEventStatus = await EventStatus.findOne({
+            userId: otherUserId,
+            'events.event': eventId
+        });
+        if (!userEventStatus) {
+            console.log("eventStatus1", userEventStatus);
+
+            return res.status(404).json({ message: "Event not found" });
+        }
+        const eventIndex = userEventStatus.events.findIndex(eventItem => eventItem.event.equals(eventId));
+
+        if (eventIndex === -1) {
+            throw new Error(`Event not found in the events array for user ${userId} and event ${eventId}`);
+        }
+        userEventStatus.events[eventIndex].status = "going";
+        await userEventStatus.save();
+        const event = await Event.findById(eventId).populate("createdBy");
+        event.attendies.push(otherUserId);
+        await event.save();
+        const createdUser = await User.findById(otherUserId);
+        console.log(createdUser);
+        console.log(createdUser.notificationToken);
+        if (createdUser.notificationToken) {
+            var notificationMessage = {
+                app_id: process.env.NOTIFICATION_APP_ID,
+                contents: {
+                    "en": `Event Request.`
+                },
+                headings: {
+                    "en": `Your Request has been accepted by ${req.user.name} to join the event ${event.checkInName} .`
+                },
+
+                large_icon: req.user.profileImageUrl,
+                big_picture: event.bannerImages,
+                included_segments: ["include_subscription_ids"],
+
+                include_subscription_ids: [`${createdUser.notificationToken}`],
+                content_available: true,
+                small_icon: "ic_notification_icon",
+                data: {
+                    event: event,
+                    PushTitle: `Your Request has been accepted by ${req.user.name} to join the event ${event.checkInName} .`
+                }
+            };
+            SendNotification(notificationMessage, async (error, results) => {
+
+            })
+        }
+        pushNotification(createdUser._id, "eventStatus", {
+            event: event,
+
+            PushTitle: `Your Request has been accepted by ${req.user.name} to join the event ${event.checkInName} .`
+        }, req.user,)
+        return res.status(200).json({ message: `User Marked as going.` });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
