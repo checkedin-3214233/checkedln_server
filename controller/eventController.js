@@ -125,6 +125,9 @@ export const requestEvent = async (req, res) => {
     const { eventId, status } = req.params;
     const userId = req.user._id;
     try {
+        if (status === "going" || status === "interested" || status === "not going") {
+            return res.status(400).json({ message: "Invalid Status" });
+        }
         const eventStatus = await EventStatus.findOne({ userId });
         if (!eventStatus) {
             const newEventStatus = new EventStatus({
