@@ -22,6 +22,10 @@ const notification = new mongoose.Schema({
                 type: String,
                 enum: ["eventStatus", "newBuddies", "normal"],
                 default: "not going"
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
             }
 
 
