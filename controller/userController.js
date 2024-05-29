@@ -257,3 +257,39 @@ export const getUserById = async (req, res, next) => {
         });
     }
 }
+
+export const getSuggestedUsers = async (req, res, next) => {
+    const userId = req.user.id;
+    const { phoneNumbers } = req.body;
+    const phoneNumberSet = new Set(phoneNumbers);
+
+    try {
+        // Find the user by ID to get the buddies list
+        const currentUser = await User.findById(userId).populate('buddies');
+
+        if (!currentUser) {
+            throw new Error('User not found');
+        }
+
+        // Extract buddies' IDs into a Set for fast lookup
+        const buddiesSet = new Set(currentUser.buddies.map(buddy => buddy._id.toString()));
+
+        // Find users with phone numbers in the Set and not in the buddies list
+        const commonUsers = await User.find({
+            phone: { $in: Array.from(phoneNumberSet) },
+            _id: { $nin: Array.from(buddiesSet) }
+        });
+
+        return res.status(200).send({
+            success: true,
+            message: "Users Found",
+            users: commonUsers
+        });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get user",
+            error: error
+        });
+    }
+}
