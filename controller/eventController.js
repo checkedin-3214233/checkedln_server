@@ -167,7 +167,7 @@ export const requestEvent = async (req, res) => {
                         PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
                     }
                 };
-                SendNotification(notificationMessage, async (error, results) => {
+                await SendNotification(notificationMessage, async (error, results) => {
 
                 })
 
@@ -219,7 +219,7 @@ export const requestEvent = async (req, res) => {
                         PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
                     }
                 };
-                SendNotification(notificationMessage, async (error, results) => {
+                await SendNotification(notificationMessage, async (error, results) => {
 
                 })
             }
@@ -263,11 +263,11 @@ export const requestEvent = async (req, res) => {
                     PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
                 }
             };
-            SendNotification(notificationMessage, async (error, results) => {
+            await SendNotification(notificationMessage, async (error, results) => {
 
             })
         }
-        pushNotification(createdUser._id, "eventStatus", {
+        await pushNotification(createdUser._id, "eventStatus", {
             event: event,
 
             PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
@@ -341,7 +341,7 @@ export const acceptRequest = async (req, res) => {
 
             })
         }
-        pushNotification(createdUser._id, "eventStatus", {
+        pushNotification(createdUser._id, "normal", {
             event: event,
 
             PushTitle: `Your Request has been accepted by ${req.user.name} to join the event ${event.checkInName} .`

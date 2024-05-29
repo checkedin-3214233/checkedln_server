@@ -62,7 +62,7 @@ export const joinEvent = async (req, res) => {
                 await notify(req.user.name, eventR.checkInName, createdUser.notificationToken, req.user.profileImageUrl, eventR.bannerImages, eventR)
 
             }
-            pushNotification(createdUser._id, "eventStatus", {
+            pushNotification(createdUser._id, "normal", {
                 event: eventR,
 
                 PushTitle: `New Request from ${req.user.name} to join your event ${event.checkInName} .`
@@ -116,7 +116,7 @@ export const joinEvent = async (req, res) => {
 
             await notify(req.user.name, eventR.checkInName, createdUser.notificationToken, req.user.profileImageUrl, eventR.bannerImages, eventR)
         }
-        pushNotification(createdUser._id, "eventStatus", {
+        pushNotification(createdUser._id, "normal", {
             event: event,
 
             PushTitle: `${req.user.name} has joined your event ${eventR.checkInName} .`
