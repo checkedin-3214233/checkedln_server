@@ -45,6 +45,20 @@ const eventSchema = new mongoose.Schema({
             default: []
         }
     ],
+    interested: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: []
+        }
+    ],
+    checkedIn: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: []
+        }
+    ],
     images: [
         {
             type: String,

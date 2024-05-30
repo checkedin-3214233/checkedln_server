@@ -82,6 +82,134 @@ export const getNearByEvents = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+export const popularEvents = async (req, res) => {
+    try {
+        const { latitude, longitude, maxDistance } = req.body;
+        const coordinates = [longitude, latitude]; // [longitude, latitude] order
+
+        // Perform a $geoNear aggregation query to find nearby locations
+        const nearbyLocations = await Location.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: coordinates
+                    },
+                    distanceField: 'distance',
+                    maxDistance: maxDistance, // in meters
+                    spherical: true
+                }
+            }
+        ]);
+        console.log(nearbyLocations);
+
+        // Extract location IDs from nearby locations
+        const locationIds = nearbyLocations.map(location => location._id);
+        console.log(locationIds);
+
+        const events = await Event.find({ type: "public", startDateTime: { $gt: new Date() }, location: { $in: locationIds }, createdBy: { $ne: req.user._id } }).populate("location").sort({ attendies: -1 });
+        return res.status(200).json({ events });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+
+}
+
+export const getBuddiesEvents = async (req, res) => {
+    const userId = req.user._id;
+
+    try {
+        // Step 1: Find the current user and populate their buddies
+        const user = await User.findById(userId).populate('buddies');
+
+        if (!user) {
+            console.error('User not found');
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const buddyIds = user.buddies.map(buddy => buddy._id);
+        console.log("Buddies", buddyIds);
+
+        // Step 2: Find events that have these buddies as attendees
+        const events = await Event.find({
+            attendies: { $in: buddyIds, $ne: req.user._id }, startDateTime: {
+                $gt: new Date()
+            }, createdBy: { $ne: req.user._id }
+        });
+        console.log("Events", events);
+        // Step 3: Create array of objects with event and friend details
+        const eventsWithBuddies = buddyIds.map(id => {
+            console.log("Buddy", id);
+            const buddy = user.buddies.find(buddy => buddy._id.equals(id));
+            let particularEvent = undefined;
+            let shuffledEvents = shuffleArray(events);
+            console.log("Shuffled", shuffledEvents);
+            for (let i = 0; i < shuffledEvents.length; i++) {
+                if (shuffledEvents[i].attendies.includes(id)) {
+                    particularEvent = shuffledEvents[i];
+                    break;
+
+                }
+            }
+
+
+            return {
+                buddy: buddy.toObject(),
+                event: particularEvent
+            };
+        });
+
+
+        return res.status(200).json(eventsWithBuddies.filter(event => event.event !== undefined));
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+export const getLiveEvents = async (req, res) => {
+    try {
+        const { latitude, longitude } = req.body;
+        const coordinates = [longitude, latitude]; // [longitude, latitude] order
+
+        // Perform a $geoNear aggregation query to find nearby locations
+        const nearbyLocations = await Location.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: coordinates
+                    },
+                    distanceField: 'distance',
+                    maxDistance: 1000, // in meters
+                    spherical: true
+                }
+            }
+        ]);
+        console.log(nearbyLocations);
+
+        // Extract location IDs from nearby locations
+        const locationIds = nearbyLocations.map(location => location._id);
+        console.log(locationIds);
+        // Find events that have a location within the specified IDs
+        const nearbyEvents = await Event.find({
+            location: { $in: locationIds }, startDateTime: {
+                $lt: new Date()
+            }, endDateTime: {
+                $gt: new Date()
+            },
+            attendies: req.user._id
+        }).populate('location'); // Populate the 'location' field with Location details
+        for (let i = 0; i < nearbyEvents.length; i++) {
+            nearbyEvents[i].checkedIn.push(req.user._id);
+
+        }
+        await nearbyEvents.save();
+        res.status(200).json({ nearbyEvents });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 export const getPastEvents = async (req, res) => {
     const userId = req.user._id;
 
@@ -351,4 +479,11 @@ export const acceptRequest = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+}
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
