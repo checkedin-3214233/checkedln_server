@@ -202,8 +202,9 @@ export const getLiveEvents = async (req, res) => {
         for (let i = 0; i < nearbyEvents.length; i++) {
             nearbyEvents[i].checkedIn.push(req.user._id);
 
+
         }
-        await nearbyEvents.save();
+
         res.status(200).json({ nearbyEvents });
     } catch (error) {
         res.status(500).json({ error: error.message });

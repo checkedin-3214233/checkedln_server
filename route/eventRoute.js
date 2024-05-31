@@ -4,19 +4,18 @@ import { getShareEventLink, joinEvent, getShareEventId } from '../controller/upd
 
 const router = express.Router();
 
-router.post('/', createEvent);
-router.get('/past', getPastEvents);
 router.get('/friendsCheckin', getBuddiesEvents);
+router.get('/past', getPastEvents);
 router.get('/upcoming', getUpcomingEvents);
 router.post('/liveEvents', getLiveEvents);
 router.post('/nearby', getNearByEvents);
-router.get('/popularEvents', popularEvents);
-
-router.get('/:eventId', getEventById);  // Ensure this is correctly placed
+router.post('/popularEvents', popularEvents);
+router.post('/', createEvent);
 router.get('/request/:eventId/:status', requestEvent);
 router.get('/shareEvent/:eventId', getShareEventLink);
 router.get('/joinEvent/:shareEventId', joinEvent);
 router.get('/acceptEvent/:eventId/:otherUserId', acceptRequest);
 router.get('/getShareEventId/:shareEventId', getShareEventId);
+router.get('/:eventId', getEventById);  // Ensure this is correctly placed
 
 export default router;
