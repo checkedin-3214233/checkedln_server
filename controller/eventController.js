@@ -135,7 +135,7 @@ export const getBuddiesEvents = async (req, res) => {
             attendies: { $in: buddyIds, $ne: req.user._id }, startDateTime: {
                 $gt: new Date()
             }, createdBy: { $ne: req.user._id }
-        });
+        }).populate('location');
         console.log("Events", events);
         // Step 3: Create array of objects with event and friend details
         const eventsWithBuddies = buddyIds.map(id => {
