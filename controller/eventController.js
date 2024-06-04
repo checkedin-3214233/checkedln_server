@@ -201,10 +201,11 @@ export const getLiveEvents = async (req, res) => {
         }).populate('location'); // Populate the 'location' field with Location details
         for (let i = 0; i < nearbyEvents.length; i++) {
             nearbyEvents[i].checkedIn.push(req.user._id);
+            await nearbyEvents[i].save();
 
 
         }
-        await nearbyEvents.save();
+
         res.status(200).json({ nearbyEvents });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -234,7 +235,7 @@ export const getUpcomingEvents = async (req, res) => {
 export const getEventById = async (req, res) => {
     const { eventId } = req.params;
     try {
-        const event = await Event.findById(eventId).populate("attendies location checkedIn");
+        const event = await Event.findById(eventId).populate("attendies location ");
         const eventStatus = await EventStatus.findOne({ userId: req.user._id, 'events.event': eventId });
         if (eventStatus) {
             const events = eventStatus.events.find(eventItem => eventItem.event.equals(eventId));
