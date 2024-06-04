@@ -204,7 +204,7 @@ export const getLiveEvents = async (req, res) => {
 
 
         }
-
+        await nearbyEvents.save();
         res.status(200).json({ nearbyEvents });
     } catch (error) {
         res.status(500).json({ error: error.message });
