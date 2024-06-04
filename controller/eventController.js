@@ -200,8 +200,11 @@ export const getLiveEvents = async (req, res) => {
             attendies: req.user._id
         }).populate('location'); // Populate the 'location' field with Location details
         for (let i = 0; i < nearbyEvents.length; i++) {
-            nearbyEvents[i].checkedIn.push(req.user._id);
-            await nearbyEvents[i].save();
+            if (!nearbyEvents[i].checkedIn.includes(req.user._id)) {
+                nearbyEvents[i].checkedIn.push(req.user._id);
+                await nearbyEvents[i].save();
+            }
+
 
 
         }
