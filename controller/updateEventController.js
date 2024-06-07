@@ -217,10 +217,10 @@ export const joinEventByThemSelf = async (req, res) => {
         });
         if (findEventStatusById) {
             // Find the index of the event object within the events array that matches the eventId
-            const eventIndex = findEventStatusById.events.findIndex(eventItem => eventItem.event.equals(updatedEvent.event));
+            const eventIndex = findEventStatusById.events.findIndex(eventItem => eventItem.event.equals(event));
 
             if (eventIndex === -1) {
-                throw new Error(`Event not found in the events array for user ${userId} and event ${updatedEvent.event}`);
+                throw new Error(`Event not found in the events array for user ${userId} and event ${event}`);
             }
             findEventStatusById.events[eventIndex].status = "going";
             await findEventStatusById.save();
@@ -244,7 +244,7 @@ export const joinEventByThemSelf = async (req, res) => {
 
         }
         eventStatus.events.push({
-            event: updatedEvent.event,
+            event: event,
             status: "going"
         });
         await eventStatus.save();
