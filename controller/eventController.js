@@ -200,7 +200,7 @@ export const getLiveEvents = async (req, res) => {
             attendies: req.user._id
         }).populate('location'); // Populate the 'location' field with Location details
         for (let i = 0; i < nearbyEvents.length; i++) {
-            if (!nearbyEvents[i].checkedIn.includes(req.user._id)) {
+            if (!nearbyEvents[i].checkedIn.contains(req.user._id)) {
                 nearbyEvents[i].checkedIn.push(req.user._id);
                 await nearbyEvents[i].save();
             }
@@ -212,6 +212,20 @@ export const getLiveEvents = async (req, res) => {
         res.status(200).json({ nearbyEvents });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+}
+export const changeEventStatus = async (req, res) => {
+    const { eventId, status } = req.params;
+    try {
+        const event = await Event.findByIdAndUpdate(eventId, { status: status }, { new: true });
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        return res.status(200).json({ event });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ error: error.message });
     }
 }
 

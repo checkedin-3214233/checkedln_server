@@ -6,6 +6,13 @@ const eventSchema = new mongoose.Schema({
         required: [true, "Event Type is required"],
         enum: ["public", "private"]
     },
+    status: {
+        type: String,
+        required: [true, "Status is required"],
+        enum: ["active", "inactive"],
+        default: "active"
+
+    },
     bannerImages: {
         type: String,
         required: [true, "Banner Image is required"],
