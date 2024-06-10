@@ -70,7 +70,7 @@ export const getNearByEvents = async (req, res) => {
         console.log(locationIds);
         // Find events that have a location within the specified IDs
         const nearbyEvents = await Event.find({
-            location: { $in: locationIds }, type: "public", startDateTime: {
+            location: { $in: locationIds }, type: "public", endDateTime: {
                 $gt: new Date()
             }, createdBy: { $ne: req.user._id }
         }).populate('location'); // Populate the 'location' field with Location details

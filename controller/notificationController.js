@@ -30,7 +30,7 @@ export const notificationController = async (req, res) => {
 export const getAllNotifications = async (req, res) => {
     const userId = req.user._id;
     try {
-        const notificationUser = await Notification.findOne({ userId }).populate('notifications.fromUser');
+        const notificationUser = await Notification.findOne({ userId }).populate('notifications.fromUser').sort({ _id: -1 });;
         if (!notificationUser) return res.status(200).send({ message: "No notifications found", data: [] });
         return res.status(200).send({ message: "Success", data: notificationUser.notifications });
     } catch (error) {
