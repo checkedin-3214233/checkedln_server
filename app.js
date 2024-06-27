@@ -10,6 +10,7 @@ import userRoute from './route/userRoute.js'
 import postRoute from './route/postRoute.js'
 import messageRoute from './route/messageRoute.js'
 import eventRoute from './route/eventRoute.js';
+import storyRoute from './route/storyRoute.js';
 import notificationRoute from './route/notificationRoute.js';
 import { verifyAccessToken } from "./services/jwt_helper.js";
 // Make sure to import the 'path' module
@@ -36,6 +37,7 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
     res.sendFile(path.join(__dirname, 'services', 'assetlinks.json'));
 });
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/story", verifyAccessToken, storyRoute);
 app.use('/upload', uploadRoute);
 app.use("/api/v1/notification", verifyAccessToken, notificationRoute)
 app.use("/api/v1/user", verifyAccessToken, userRoute)

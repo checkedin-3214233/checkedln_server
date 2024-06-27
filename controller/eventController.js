@@ -506,3 +506,55 @@ function shuffleArray(array) {
     }
     return array;
 }
+export const deleteEvent = async (req, res) => {
+    const { eventId } = req.params;
+    try {
+        const event = await Event.findByIdAndDelete(eventId);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        return res.status(200).json({ message: "Event deleted successfully" });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+export const updateEvent = async (req, res) => {
+
+    const { eventId } = req.params;
+    const { type, bannerImages, checkInName, startDateTime, endDateTime, address, description, lat, long, price } = req.body;
+    const createdBy = req.user._id;
+    console.log([long, lat]);
+
+    try {
+        const newLocation = new Location({
+            coordinates: {
+                type: 'Point',
+                coordinates: [long, lat] // [longitude, latitude] order
+            },
+            address: address
+        });
+        await newLocation.save().then(async (savedLocation) => {
+            const event = await Event.findByIdAndUpdate(eventId, {
+                type,
+                bannerImages,
+                checkInName,
+                startDateTime,
+                endDateTime,
+                description,
+                createdBy,
+                location: savedLocation._id,
+                price: price
+            }, { new: true });
+            if (!event) {
+                return res.status(404).json({ message: "Event not found" });
+            }
+            return res.status(200).json({ event });
+
+        }).catch((error) => {
+            return res.status(500).json({ error: error.message });
+
+        });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
