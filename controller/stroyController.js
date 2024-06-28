@@ -37,7 +37,7 @@ export const getUserStory = async (req, res) => {
         }
         const friendsUser = user.buddies;
         const stories = await Stories.find({ userId: { $in: friendsUser } })
-            .populate('userStories')
+            .populate('userStories userId')
             .exec();
 
         return res.status(200).json(stories);
