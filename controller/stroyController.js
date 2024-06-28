@@ -39,8 +39,8 @@ export const getUserStory = async (req, res) => {
         const stories = await Stories.find({ userId: { $in: friendsUser } })
             .populate('userStories userId')
             .exec();
-
-        return res.status(200).json(stories);
+        const nonEmptyStories = stories.filter(story => story.userStories.length > 0);
+        return res.status(200).json(nonEmptyStories);
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
