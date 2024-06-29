@@ -233,7 +233,7 @@ export const getPastEvents = async (req, res) => {
     const userId = req.user._id;
 
     try {
-        const events = await Event.find({ startDateTime: { $lt: new Date() }, attendies: userId });
+        const events = await Event.find({ startDateTime: { $lt: new Date() }, attendies: userId }).populate("location location.coordinates");
         res.status(200).json({ events });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -242,7 +242,7 @@ export const getPastEvents = async (req, res) => {
 export const getUpcomingEvents = async (req, res) => {
     const userId = req.user._id;
     try {
-        const events = await Event.find({ startDateTime: { $gt: new Date() }, attendies: userId });
+        const events = await Event.find({ startDateTime: { $gt: new Date() }, attendies: userId }).populate("location location.coordinates.");
         res.status(200).json({ events });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -554,6 +554,23 @@ export const updateEvent = async (req, res) => {
             return res.status(500).json({ error: error.message });
 
         });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
+export const addImages = async (req, res) => {
+    const { eventId } = req.params;
+    const { image } = req.body;
+    try {
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        event.images.push(image);
+        await event.save();
+        return res.status(200).json({ message: 'Image added successfully' });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

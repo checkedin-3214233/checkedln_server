@@ -1,5 +1,5 @@
 import express from "express";
-import { createEvent, getPastEvents, getUpcomingEvents, getNearByEvents, getEventById, requestEvent, changeEventStatus, acceptRequest, getBuddiesEvents, popularEvents, getLiveEvents, updateEvent, deleteEvent } from '../controller/eventController.js';
+import { createEvent, getPastEvents, getUpcomingEvents, getNearByEvents, getEventById, requestEvent, changeEventStatus, acceptRequest, getBuddiesEvents, popularEvents, getLiveEvents, updateEvent, deleteEvent, addImages } from '../controller/eventController.js';
 import { getShareEventLink, joinEvent, getShareEventId, joinEventByThemSelf } from '../controller/updateEventController.js';
 
 const router = express.Router();
@@ -19,5 +19,5 @@ router.get('/joinEventByThemSelf/:eventId', joinEventByThemSelf);
 router.get('/acceptEvent/:eventId/:otherUserId', acceptRequest);
 router.get('/getShareEventId/:shareEventId', getShareEventId);
 router.get('/:eventId', getEventById);  // Ensure this is correctly placed
-
+router.patch('/addImage/:eventId', addImages);
 export default router;
