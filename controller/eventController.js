@@ -32,7 +32,7 @@ export const createEvent = async (req, res) => {
                     price: price
 
                 });
-                const getNewEvent = Event.findById(event._id).populate("location");
+                const getNewEvent = await Event.findById(event._id).populate("location");
                 return res.status(201).json({ getNewEvent });
             })
             .catch((error) => {
