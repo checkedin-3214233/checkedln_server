@@ -31,8 +31,9 @@ export const createEvent = async (req, res) => {
                     location: savedLocation._id,
                     price: price
 
-                }).populate("location location.coordinates");
-                return res.status(201).json({ event });
+                });
+                const getNewEvent = Event.findById(event._id).populate("location");
+                return res.status(201).json({ getNewEvent });
             })
             .catch((error) => {
 
