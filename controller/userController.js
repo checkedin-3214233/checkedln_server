@@ -1,4 +1,8 @@
-import e from "express";
+import express from "express";
+import otpGenerator from "otp-generator";
+import { sendSMS } from "../services/vonnageServices.js";
+import bcrypt from "bcryptjs"
+import Otp from "../models/otpModel.js";
 import User from "../models/userModels.js";
 import RequestedUser from "../models/userRequestModel.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwt_helper.js"
@@ -67,6 +71,96 @@ export const signup = async (req, res, next) => {
         res.status(500).send({
             success: false,
             message: "Unable to create user",
+            error: error
+
+        })
+    }
+
+
+}
+export const sendOtp = async (req, res, next) => {
+    const { number } = req.body;
+    if (!number) {
+        return res.status(400).send({ "message": "Phone is Required", "isSuccesfull": false });
+
+    }
+    try {
+        const userOtp = await Otp.findOne({ number: number });
+        if (userOtp) {
+            await Otp.deleteOne({ number: number });
+        }
+        const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, digits: true, lowerCaseAlphabets: false });
+        const otp = new Otp({
+            number: number,
+            otp: OTP
+        });
+        const salt = await bcrypt.genSalt(10);
+        otp.otp = await bcrypt.hash(otp.otp, salt);
+
+        const result = await otp.save();
+        console.log(result);
+        if (result) {
+            await sendSMS(number, `Your Otp for Checkedln verification is ${OTP}.Valid for 5 minutes only`, async (error, results) => {
+                console.log(error, results);
+                if (error) {
+                    return res.status(500).send({
+                        success: false,
+                        message: "Unable to send OTP",
+                        error: error
+
+                    })
+                }
+                return res.status(200).send({
+                    success: true,
+                    message: "OTP Sent Successfully",
+                    otp: OTP
+                })
+            });
+        } else {
+            return res.status(500).send({
+                success: false,
+                message: "Unable to send OTP",
+                error: error
+
+            })
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({
+            success: false,
+            message: "Unable to send OTP",
+            error: error
+
+        })
+    }
+
+}
+
+export const verifyOtp = async (req, res, next) => {
+    const { number, otp } = req.body;
+    console.log(otp);
+    if (!number) {
+        return res.status(400).send({ "message": "Phone is Required", "isSuccesfull": false });
+
+
+    }
+    if (!otp) {
+        return res.status(400).send({ "message": "OTP is Required", "isSuccesfull": false });
+
+    }
+    try {
+        const userOtp = await Otp.findOne({ number: number });
+        if (!userOtp) return res.status(400).send({ "message": "OTP Not Found", "isSuccesfull": false });
+        const isValid = await bcrypt.compare(otp, userOtp.otp);
+        console.log(isValid);
+        if (!isValid) return res.status(400).send({ "message": "Invalid OTP", "isSuccesfull": false });
+        await Otp.deleteOne({ number: number });
+        return res.status(200).send({ "message": "OTP Verified Successfully", "isSuccesfull": true });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to verify OTP",
             error: error
 
         })
