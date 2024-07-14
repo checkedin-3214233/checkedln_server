@@ -31,7 +31,7 @@ export const createEvent = async (req, res) => {
                     location: savedLocation._id,
                     price: price
 
-                });
+                }).populate("location location.coordinates");
                 return res.status(201).json({ event });
             })
             .catch((error) => {
