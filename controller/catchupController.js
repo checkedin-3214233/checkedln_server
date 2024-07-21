@@ -90,3 +90,44 @@ export const rejectCatchUpRequest = async (req, res, next) => {
         });
     }
 }
+
+export const unfollowUser = async (req, res, next) => {
+    try {
+        const { unfollowUserId } = req.params;
+        const userId = req.user.id;
+        const isBuddies = await User.findOne({ _id: userId, buddies: unfollowUserId });
+        const isBuddiesFromUnfollow = await User.findOne({ _id: unfollowUserId, buddies: userId });
+        console.log(isBuddies);
+        console.log(isBuddiesFromUnfollow);
+        if (!isBuddies) return res.status(400).send({
+            success: false,
+            message: "User Not a Buddy"
+        });
+        if (!isBuddiesFromUnfollow) return res.status(400).send({
+            success: false,
+            message: "User Not a Buddy"
+        });
+        const indexBuddies = isBuddies.buddies.indexOf(unfollowUserId);
+        if (indexBuddies > -1) { // only splice array when item is found
+            isBuddies.buddies.splice(indexBuddies, 1); // 2nd parameter means remove one item only
+        }
+        const indexBuddiesFromUnfollow = isBuddiesFromUnfollow.buddies.indexOf(userId);
+        if (indexBuddiesFromUnfollow > -1) { // only splice array when item is found
+            isBuddiesFromUnfollow.buddies.splice(indexBuddiesFromUnfollow, 1); // 2nd parameter means remove one item only
+        }
+        await isBuddies.save();
+        await isBuddiesFromUnfollow.save();
+        return res.status(200).send({
+            success: true,
+            message: "User Unfollowed"
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).send({
+            success: false,
+            message: "Unable to unfollow user",
+            error: error
+        })
+    }
+}

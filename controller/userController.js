@@ -48,6 +48,8 @@ export const signup = async (req, res, next) => {
         const accessToken = await signAccessToken(newUser.id);
         const refreshToken = await signRefreshToken(newUser.id);
         const requestedUser = await RequestedUser.create({ userId: newUser.id, requestedUser: [] });
+        newUser.requestedUser = requestedUser.id;
+        await newUser.save();
 
         return res.status(201).send({
             success: true,
