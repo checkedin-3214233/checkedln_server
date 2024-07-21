@@ -253,23 +253,43 @@ export const getUpcomingEvents = async (req, res) => {
 export const getEventById = async (req, res) => {
     const { eventId } = req.params;
     try {
-        const event = await Event.findById(eventId).populate("attendies location checkedIn");
-        const eventStatus = await EventStatus.findOne({ userId: req.user._id, 'events.event': eventId });
-        if (eventStatus) {
-            const events = eventStatus.events.find(eventItem => eventItem.event.equals(eventId));
+        // Fetch the event by ID and populate attendees, location, and checkedIn
+        const event = await Event.findById(eventId)
+            .populate('attendies')
+            .populate('location')
+            .populate('checkedIn');
 
-
-            return res.status(200).json({ event, status: events.status });
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
         }
+
+        // Populate requestedUser inside each attendee
+        await Event.populate(event, {
+            path: 'attendies',
+            populate: {
+                path: 'requestedUser',
+                model: 'RequestedUser', // Replace with your RequestedUser model
+                select: 'requestedUser'
+            }
+        });
+
+        // Fetch event status for the logged-in user
+        const eventStatus = await EventStatus.findOne({ userId: req.user._id, 'events.event': eventId });
+
+        if (eventStatus) {
+            // Find the specific event status for the current event
+            const eventItem = eventStatus.events.find(eventItem => eventItem.event.equals(eventId));
+
+            return res.status(200).json({ event, status: eventItem.status });
+        }
+
         return res.status(200).json({ event, status: "not going" });
 
     } catch (error) {
-        console.log(error.message);
+        console.error('Error fetching event:', error);
         return res.status(500).json({ error: error.message });
     }
-
 }
-
 export const requestEvent = async (req, res) => {
     const { eventId, status } = req.params;
     const userId = req.user._id;
