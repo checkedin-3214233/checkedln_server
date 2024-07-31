@@ -156,7 +156,7 @@ export const verifyOtp = async (req, res, next) => {
         if (!userOtp) return res.status(400).send({ "message": "OTP Not Found", "isSuccesfull": false });
         const isValid = await bcrypt.compare(otp, userOtp.otp);
         console.log(isValid);
-        if (!isValid) return res.status(400).send({ "message": "Invalid OTP", "isSuccesfull": false });
+        if (!isValid) return res.status(200).send({ "message": "Invalid OTP", "isSuccesfull": false });
         await Otp.deleteOne({ number: number });
         return res.status(200).send({ "message": "OTP Verified Successfully", "isSuccesfull": true });
     } catch (error) {
