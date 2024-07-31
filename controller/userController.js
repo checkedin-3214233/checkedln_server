@@ -13,9 +13,9 @@ export const checkUser = async (req, res, next) => {
     const user = await User.findOne({
         phone: number
     })
-    if (user) return res.status(200).send({ "message": "Please Login", "isUserExists": true })
+    if (user) return res.status(200).send({ "message": "The number is already registerd with us,Please Login", "isUserExists": true })
 
-    return res.status(200).send({ "message": "Please Register", "isUserExists": false })
+    return res.status(200).send({ "message": "The number is not already registerd with us,Please Register", "isUserExists": false })
 }
 
 export const signup = async (req, res, next) => {
