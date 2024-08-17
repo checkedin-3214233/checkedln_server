@@ -55,12 +55,11 @@ const userSchema = new mongoose.Schema({
         }
     ],
     requestedUser:
-        [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'RequestedUser',
-            default: []
+    {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RequestedUser',
 
-        }]
+    }
     ,
 
 
