@@ -239,7 +239,7 @@ export const getUser = async (req, res, next) => {
     const userId = req.payload.userId;
 
     try {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate('requestedUser');
         if (!user) return res.status(404).send({ "message": "User Not Found", success: false, });
         return res.status(200).send({
             success: true,
