@@ -296,7 +296,7 @@ export const updateUser = async (req, res, next) => {
 export const getSearchedUser = async (req, res, next) => {
     const { userName } = req.body;
     try {
-        const users = await User.find({ userName: { $regex: userName, $options: 'i' } });
+        const users = await User.find({ userName: { $regex: userName, $options: 'i' } }).populate('requestedUser');
         return res.status(200).send({
             success: true,
             message: "Users Found",
