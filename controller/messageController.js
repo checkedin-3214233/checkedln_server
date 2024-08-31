@@ -170,7 +170,11 @@ export const getChatList = async (req, res) => {
     try {
         const userId = req.user._id;
 
-        const userChatList = await UsersChat.findOne({ senderId: userId }).populate("allUsers.users allUsers.lastMessage");
+        const userChatList = await UsersChat.findOne({ senderId: userId }).populate({
+            path: "allUsers.users",
+            populate: { path: "requestedUser" }
+        })
+            .populate("allUsers.lastMessage");
         if (!userChatList) return res.status(200).json({ "allUsers": [] });
         return res.status(200).json({ "allUsers": userChatList.allUsers });
     } catch (error) {
