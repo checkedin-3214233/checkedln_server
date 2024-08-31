@@ -262,36 +262,43 @@ export const getUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
     const userId = req.payload.userId;
     const { name, userName, profileImageUrl, dateOfBirth, gender, bio } = req.body;
-    try {
-        const username = await User.findOne({ _id: { $ne: userId }, userName: userName });
-        if (username) return res.status(400).send({ "message": "UserName Already Exit", success: false, });
 
-        const newUser = await User.findOneAndUpdate({
-            _id: userId
-        }, {
-            name: name,
-            userName: userName,
-            profileImageUrl: profileImageUrl,
-            dateOfBirth: dateOfBirth,
-            gender: gender,
-            bio: bio
-        }, {
-            returnOriginal: false
-        });
+    try {
+        const existingUser = await User.findOne({ _id: { $ne: userId }, userName });
+        if (existingUser) {
+            return res.status(400).send({
+                message: "UserName Already Exists",
+                success: false
+            });
+        }
+
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId },
+            {
+                name,
+                userName,
+                profileImageUrl,
+                dateOfBirth,
+                gender,
+                bio
+            },
+            { new: true }  // Updated option for Mongoose
+        ).populate('requestedUser');
+
         return res.status(200).send({
             success: true,
-            message: "User Updated Successfully", user: newUser
-        })
+            message: "User Updated Successfully",
+            user: updatedUser
+        });
     } catch (error) {
         return res.status(500).send({
             success: false,
             message: "Unable to update user",
-            error: error
-
-        })
+            error: error.message
+        });
     }
-
 }
+
 
 export const getSearchedUser = async (req, res, next) => {
     const { userName } = req.body;
