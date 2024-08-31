@@ -579,19 +579,25 @@ export const updateEvent = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 }
-
 export const addImages = async (req, res) => {
     const { eventId } = req.params;
-    const { image } = req.body;
+    const { images } = req.body;  // Expecting `images` to be an array of image URLs or paths
+
     try {
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
         }
 
-        event.images.push(image);
+        if (!Array.isArray(images)) {
+            return res.status(400).json({ message: 'Images should be an array' });
+        }
+
+        // Add each image to the event's images array
+        event.images.push(...images);
         await event.save();
-        return res.status(200).json({ message: 'Image added successfully' });
+
+        return res.status(200).json({ message: 'Images added successfully' });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
