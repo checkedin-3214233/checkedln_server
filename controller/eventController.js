@@ -555,6 +555,7 @@ export const updateEvent = async (req, res) => {
             address: address
         });
         await newLocation.save().then(async (savedLocation) => {
+            console.log(savedLocation);
             const event = await Event.findByIdAndUpdate(eventId, {
                 type,
                 bannerImages,
@@ -563,9 +564,9 @@ export const updateEvent = async (req, res) => {
                 endDateTime,
                 description,
                 createdBy,
-                location: savedLocation._id,
+                location: savedLocation,
                 price: price
-            }, { new: true });
+            }, { new: true }).populate("location");
             if (!event) {
                 return res.status(404).json({ message: "Event not found" });
             }
