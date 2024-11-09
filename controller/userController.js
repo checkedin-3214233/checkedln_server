@@ -6,6 +6,7 @@ import Otp from "../models/otpModel.js";
 import User from "../models/userModels.js";
 import RequestedUser from "../models/userRequestModel.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwt_helper.js"
+import { log } from "console";
 
 export const checkUser = async (req, res, next) => {
     console.log("Check User");
@@ -387,6 +388,25 @@ export const getSuggestedUsers = async (req, res, next) => {
             success: true,
             message: "Users Found",
             users: commonUsers
+        });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get user",
+            error: error
+        });
+    }
+}
+export const getMyBuddies = async (req, res, next) => {
+    const userId = req.user.id;
+    try {
+        const user = await User.findById(userId).populate('buddies');
+        log(user);
+        if (!user) return res.status(404).send({ "message": "User Not Found", success: false, });
+        return res.status(200).send({
+            success: true,
+            message: "User Found",
+            buddies: user.buddies
         });
     } catch (error) {
         return res.status(500).send({

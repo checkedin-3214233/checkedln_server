@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUser, updateUser, getSearchedUser, getUserById, getSuggestedUsers } from '../controller/userController.js';
+import { getUser, updateUser, getSearchedUser, getUserById, getSuggestedUsers, getMyBuddies } from '../controller/userController.js';
 import { acceptCatchUpRequest, rejectCatchUpRequest, catchUpUser, unfollowUser } from '../controller/catchupController.js';
 const router = express.Router();
 router.get('/', getUser);
@@ -10,5 +10,6 @@ router.get("/catchUpUser/:catchUpUserId", catchUpUser);
 router.get("/unfollowUser/:unfollowUserId", unfollowUser);
 router.get("/acceptCatchUpRequest/:requestId", acceptCatchUpRequest);
 router.get("/rejectCatchUpRequest/:requestId", rejectCatchUpRequest);
+router.get("/getMyBuddies", getMyBuddies);
 router.post("/getSuggestedUsers", getSuggestedUsers);
 export default router;
