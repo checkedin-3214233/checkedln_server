@@ -4,6 +4,7 @@ import { sendSMS } from "../services/vonnageServices.js";
 import bcrypt from "bcryptjs"
 import Otp from "../models/otpModel.js";
 import User from "../models/userModels.js";
+import Event from "../models/eventModel.js";
 import RequestedUser from "../models/userRequestModel.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwt_helper.js"
 import { log } from "console";
@@ -434,4 +435,36 @@ export const getBuddiesByUserId = async (req, res, next) => {
         });
     }
 
+}
+
+export const getCheckInByUserId = async (req, res, next) => {
+    const { userId } = req.params;
+    try {
+        try {
+            const events = await Event.find({
+                checkedIn: userId,  // Checks if userId is in the checkedIn array
+                startDateTime: { $lt: new Date() }  // Ensures startDateTime is before the current date
+            });
+            log(events);
+            return res.status(200).send({
+                success: true,
+                message: "Events Found",
+                events: events
+            });
+        } catch (error) {
+            log(error);
+            return res.status(500).send({
+                success: false,
+                message: "Unable to get events",
+                error: error
+            });
+        }
+    } catch (error) {
+        log(error);
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get events",
+            error: error
+        });
+    }
 }

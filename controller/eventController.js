@@ -201,7 +201,7 @@ export const getLiveEvents = async (req, res) => {
             attendies: req.user._id
         }).populate('location'); // Populate the 'location' field with Location details
         for (let i = 0; i < nearbyEvents.length; i++) {
-            if (!nearbyEvents[i].checkedIn.contains(req.user._id)) {
+            if (!nearbyEvents[i].checkedIn.includes(req.user._id)) {
                 nearbyEvents[i].checkedIn.push(req.user._id);
                 await nearbyEvents[i].save();
             }
@@ -212,6 +212,7 @@ export const getLiveEvents = async (req, res) => {
 
         res.status(200).json({ nearbyEvents });
     } catch (error) {
+        console.log('Error fetching events:', error);
         res.status(500).json({ error: error.message });
     }
 }
