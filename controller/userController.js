@@ -416,3 +416,22 @@ export const getMyBuddies = async (req, res, next) => {
         });
     }
 }
+export const getBuddiesByUserId = async (req, res, next) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findById(userId).populate('buddies');
+        if (!user) return res.status(404).send({ "message": "User Not Found", success: false, });
+        return res.status(200).send({
+            success: true,
+            message: "User Found",
+            buddies: user.buddies
+        });
+    } catch (error) {
+        return res.status(500).send({
+            success: false,
+            message: "Unable to get user",
+            error: error
+        });
+    }
+
+}
