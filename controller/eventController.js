@@ -254,25 +254,27 @@ export const getUpcomingEvents = async (req, res) => {
 export const getEventById = async (req, res) => {
     const { eventId } = req.params;
     try {
-        // Fetch the event by ID and populate attendees, location, and checkedIn
+        // Fetch the event by ID and populate attendies, location, and checkedIn
         const event = await Event.findById(eventId)
-            .populate('attendies')
-            .populate('location')
-            .populate('checkedIn');
+            .populate({
+                path: 'attendies',
+                populate: {
+                    path: 'requestedUser',
+                    model: 'RequestedUser', // Adjust to match your model name
+                }
+            })
+            .populate({
+                path: 'checkedIn',
+                populate: {
+                    path: 'requestedUser',
+                    model: 'RequestedUser',
+                }
+            })
+            .populate('location');
 
         if (!event) {
             return res.status(404).json({ error: 'Event not found' });
         }
-
-        // Populate requestedUser inside each attendee
-        await Event.populate(event, {
-            path: 'attendies',
-            populate: {
-                path: 'requestedUser',
-                model: 'RequestedUser', // Replace with your RequestedUser model
-                select: 'requestedUser'
-            }
-        });
 
         // Fetch event status for the logged-in user
         const eventStatus = await EventStatus.findOne({ userId: req.user._id, 'events.event': eventId });
@@ -281,7 +283,7 @@ export const getEventById = async (req, res) => {
             // Find the specific event status for the current event
             const eventItem = eventStatus.events.find(eventItem => eventItem.event.equals(eventId));
 
-            return res.status(200).json({ event, status: eventItem.status });
+            return res.status(200).json({ event, status: eventItem?.status || "not going" });
         }
 
         return res.status(200).json({ event, status: "not going" });
@@ -290,7 +292,8 @@ export const getEventById = async (req, res) => {
         console.error('Error fetching event:', error);
         return res.status(500).json({ error: error.message });
     }
-}
+};
+
 export const requestEvent = async (req, res) => {
     const { eventId, status } = req.params;
     const userId = req.user._id;
