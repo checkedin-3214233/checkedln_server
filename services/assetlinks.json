@@ -10,5 +10,32 @@
                 "4A:59:84:A3:F5:3A:70:8A:20:20:EC:57:D3:13:E7:D0:83:B5:7E:B4:53:18:11:70:4E:43:64:8B:9A:1E:7A:54"
             ]
         }
-    }
+    },
+    [
+        {
+            "relation": [
+                "delegate_permission/common.handle_all_urls"
+            ],
+            "target": {
+                "namespace": "android_app",
+                "package_name": "com.example.checkedln",
+                "sha256_cert_fingerprints": [
+                    "4A:59:84:A3:F5:3A:70:8A:20:20:EC:57:D3:13:E7:D0:83:B5:7E:B4:53:18:11:70:4E:43:64:8B:9A:1E:7A:54"
+                ]
+            }
+        },
+        {
+            "relation": [
+                "delegate_permission/common.handle_all_urls",
+                "delegate_permission/common.get_login_creds"
+            ],
+            "target": {
+                "namespace": "android_app",
+                "package_name": "com.rahul.syncup",
+                "sha256_cert_fingerprints": [
+                    "61:10:A7:BC:A8:12:A2:EB:7E:92:3F:95:84:B0:AE:B0:10:98:F2:B1:A9:DC:76:81:80:FA:49:3D:67:3D:E0:80"
+                ]
+            }
+        }
+    ]
 ]
